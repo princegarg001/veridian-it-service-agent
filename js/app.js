@@ -229,4 +229,9 @@
     </div>`;
 
   renderTickets(); renderAudit(); renderTriageSkeleton(); newSession();
+  // deep links for demos: ?tab=triage&run=1  or  ?req=REQ-08
+  const q = new URLSearchParams(location.search);
+  if (q.get("tab")) showTab(q.get("tab"));
+  if (q.get("run")) $("#runAll").click();
+  if (q.get("req")) { const b = $(`.sample[data-i="${D.requests.findIndex(r => r.id === q.get("req"))}"]`); if (b) b.click(); }
 })();
