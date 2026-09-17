@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Veridian IT Service Agent</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛡️</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<header class="top">
+  <div class="brand"><span class="logo">V</span><div><b>Veridian IT Service Agent</b><small>Internal employee support · grounded in KB-01…KB-10 + Asset Policy</small></div></div>
+  <nav id="tabs">
+    <button data-tab="chat" class="on">Agent Chat</button>
+    <button data-tab="triage">Triage Console</button>
+    <button data-tab="tickets">Tickets <span id="tkCount" class="pill">0</span></button>
+    <button data-tab="audit">Audit Trail <span id="auCount" class="pill">0</span></button>
+    <button data-tab="kb">Knowledge Base</button>
+    <button data-tab="arch">Architecture</button>
+  </nav>
+  <button id="settingsBtn" class="ghost" title="Settings">⚙ <span id="modeLbl">Rules mode</span></button>
+</header>
+
+<main>
+  <!-- CHAT -->
+  <section id="tab-chat" class="tab on">
+    <div class="chatgrid">
+      <div class="panel chatpanel">
+        <div class="chathead">
+          <label>Employee <select id="who"></select></label>
+          <label>Date <select id="day"></select></label>
+          <button id="newChat" class="ghost">New conversation</button>
+        </div>
+        <div id="msgs" class="msgs"></div>
+        <div id="chips" class="chips"></div>
+        <form id="composer" class="composer">
+          <input id="inp" autocomplete="off" placeholder="Describe your IT issue… e.g. “I'm locked out after 6 tries”">
+          <button class="primary">Send</button>
+        </form>
+        <div class="samples"><span>Try a data-pack request:</span><div id="samples"></div></div>
+      </div>
+      <aside class="panel tracepanel">
+        <h3>Agent reasoning <small>live trace of the last turn</small></h3>
+        <div id="trace" class="trace"><p class="muted">Send a message to see intake → intent → retrieval → policy → guardrails → decision → ticket.</p></div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- TRIAGE -->
+  <section id="tab-triage" class="tab">
+    <div class="panel">
+      <div class="row between">
+        <div><h2>Triage Console</h2><p class="muted">Runs the agent over all 15 employee requests and the active tickets in the Section 3 queue. For each one it checks the recorded status against policy.</p></div>
+        <button id="runAll" class="primary">▶ Run agent on full queue</button>
+      </div>
+      <div id="kpis" class="kpis"></div>
+      <div class="tablewrap"><table id="triageTbl"><thead><tr><th>ID</th><th>Employee</th><th>Request</th><th>Current status</th><th>Intent</th><th>Agent decision</th><th>Risk</th><th>Sources</th><th>Status check</th></tr></thead><tbody></tbody></table></div>
+      <h3 style="margin-top:24px">Existing ticket queue (Section 3)</h3>
+      <div class="tablewrap"><table id="queueTbl"><thead><tr><th>Ticket</th><th>Employee</th><th>Issue</th><th>Status</th><th>Agent assessment</th><th>Risk</th><th>Rationale</th></tr></thead><tbody></tbody></table></div>
+    </div>
+  </section>
+
+  <!-- TICKETS -->
+  <section id="tab-tickets" class="tab">
+    <div class="panel">
+      <div class="row between"><h2>Structured tickets</h2><div><button id="expTk" class="ghost">Export JSON</button> <button id="clrTk" class="ghost">Clear</button></div></div>
+      <div id="ticketList" class="tickets"></div>
+    </div>
+  </section>
+
+  <!-- AUDIT -->
+  <section id="tab-audit" class="tab">
+    <div class="panel">
+      <div class="row between"><h2>Audit trail</h2><div><input id="auFilter" placeholder="Filter…"> <button id="expAu" class="ghost">Export JSON</button> <button id="clrAu" class="ghost">Clear</button></div></div>
+      <p class="muted">Append-only log of every stage: who acted (employee / agent / LLM / guardrail), what was decided, and which source it was based on. Each entry is hash-chained to the previous one so tampering can be detected.</p>
+      <div class="tablewrap"><table id="auditTbl"><thead><tr><th>Time</th><th>Session</th><th>Actor</th><th>Stage</th><th>Detail</th><th>Hash</th></tr></thead><tbody></tbody></table></div>
+    </div>
+  </section>
+
+  <!-- KB -->
+  <section id="tab-kb" class="tab"><div class="panel"><h2>Knowledge base (the only allowed sources)</h2><div id="kbList" class="kbgrid"></div></div></section>
+
+  <!-- ARCH -->
+  <section id="tab-arch" class="tab"><div class="panel" id="archPanel"></div></section>
+</main>
+
+<div id="drawer" class="drawer"><div class="drawerin"><button class="ghost close" id="drawerClose">✕</button><div id="drawerBody"></div></div></div>
+
+<dialog id="settings">
+  <form method="dialog">
+    <h3>Reasoning mode</h3>
+    <p class="muted">Rules mode runs fully offline and deterministically. Hybrid mode adds Claude for intent and entity understanding of messy text. <b>Decisions always stay with the policy engine.</b> Your key stays in this browser tab's memory and is never saved.</p>
+    <label>Anthropic API key (optional)<input id="apiKey" type="password" placeholder="sk-ant-…"></label>
+    <label>Model<input id="model" value="claude-sonnet-5"></label>
+    <menu><button value="cancel" class="ghost">Cancel</button><button id="saveSettings" value="ok" class="primary">Save</button></menu>
+  </form>
+</dialog>
+
+<script src="js/data.js"></script>
+<script src="js/engine.js"></script>
+<script src="js/llm.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
